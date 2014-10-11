@@ -527,6 +527,8 @@
                                           event.title, @"title",
                                           event.location, @"location",
                                           event.notes, @"message",
+                                          event.eventIdentifier, @"id",
+                                          event.calendarItemExternalIdentifier, @"syncId",
                                           [df stringFromDate:event.startDate], @"startDate",
                                           [df stringFromDate:event.endDate], @"endDate", nil];
             [finalResults addObject:entry];
