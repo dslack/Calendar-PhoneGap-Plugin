@@ -388,7 +388,7 @@
         [self writeJavascript:[pluginResult toErrorCallbackString:callbackId]];
     } else {
         NSLog(@"Reached Success");
-        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:myEvent.calendarItemExternalIdentifier];
         [self writeJavascript:[pluginResult toSuccessCallbackString:callbackId]];
     }
 }
@@ -473,6 +473,7 @@
         for (EKEvent * event in matchingEvents) {
             NSMutableDictionary *entry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
                                           event.title, @"title",
+                                          event.calendarItemExternalIdentifier, @"id",
                                           [df stringFromDate:event.startDate], @"startDate",
                                           [df stringFromDate:event.endDate], @"endDate",
                                           nil];
@@ -527,8 +528,7 @@
                                           event.title, @"title",
                                           event.location, @"location",
                                           event.notes, @"message",
-                                          event.eventIdentifier, @"id",
-                                          event.calendarItemExternalIdentifier, @"syncId",
+                                            event.calendarItemExternalIdentifier, @"id",
                                           [df stringFromDate:event.startDate], @"startDate",
                                           [df stringFromDate:event.endDate], @"endDate", nil];
             [finalResults addObject:entry];
