@@ -300,6 +300,45 @@
 }
 
 - (void)listEventsInRange:(CDVInvokedUrlCommand*)command {
+    NSString *callbackId = command.callbackId;
+    NSDictionary* options = [command.arguments objectAtIndex:0];
+    NSNumber* startTime  = [options objectForKey:@"startTime"];
+    NSNumber* endTime    = [options objectForKey:@"endTime"];
+
+    NSTimeInterval _startInterval = [startTime doubleValue] / 1000; // strip millis
+    NSDate *myStartDate = [NSDate dateWithTimeIntervalSince1970:_startInterval];
+    
+    NSTimeInterval _endInterval = [endTime doubleValue] / 1000; // strip millis
+    NSDate *endDate = [NSDate dateWithTimeIntervalSince1970:_endInterval];
+    NSPredicate *fetchCalendarEvents = [eventStore predicateForEventsWithStartDate:myStartDate endDate:endDate calendars:nil];
+    NSArray *matchingEvents = [eventStore eventsMatchingPredicate:fetchCalendarEvents];
+    
+    NSMutableArray *finalResults = [[NSMutableArray alloc] initWithCapacity:matchingEvents.count];
+    
+    NSDateFormatter *df = [[NSDateFormatter alloc] init];
+    [df setDateFormat:@"yyyy-MM-dd HH:mm:ss"];
+    
+    // Stringify the results
+    for (EKEvent * event in matchingEvents) {
+        NSMutableDictionary *entry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
+                                      event.title, @"title",
+                                      event.calendarItemExternalIdentifier, @"id",
+                                      [df stringFromDate:event.startDate], @"startDate",
+                                      [df stringFromDate:event.endDate], @"endDate",
+                                      nil];
+        // optional fields
+        if (event.location != nil) {
+            [entry setObject:event.location forKey:@"location"];
+        }
+        if (event.notes != nil) {
+            [entry setObject:event.notes forKey:@"message"];
+        }
+        [finalResults addObject:entry];
+    }
+    
+    CDVPluginResult* result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsArray:finalResults];
+    [self writeJavascript:[result toSuccessCallbackString:callbackId]];
+
 }
 
 - (void)createEventWithOptions:(CDVInvokedUrlCommand*)command {
